@@ -2,6 +2,7 @@
 using PaypalIntegeration.Models;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -37,7 +38,7 @@ namespace PaypalIntegeration.Controllers
                     //it is returned by the create function call of the payment class  
                     // Creating a payment  
                     // baseURL is the url on which paypal sendsback the data.  
-                    string baseURI = Request.Url.Scheme + "://" + Request.Url.Authority + "/Home/PaymentWithPayPal?";
+                    string baseURI = Request.Url.Scheme + "://" + Request.Url.Authority + "/Paypal/PaymentWithPayPal?";
                     //here we are generating guid for storing the paymentID received in session  
                     //which will be used in the payment execution  
                     var guid = Convert.ToString((new Random()).Next(100000));
@@ -74,6 +75,7 @@ namespace PaypalIntegeration.Controllers
             }
             catch (Exception ex)
             {
+                var ms = ex;
                 return View("FailureView");
             }
             //on successful payment, show success page to user.  
@@ -150,6 +152,32 @@ namespace PaypalIntegeration.Controllers
             };
             // Create a payment using a APIContext  
             return this.payment.Create(apiContext);
+        }
+
+
+        public ActionResult ValidateCommand(string product, string totalPrice)
+        {
+            bool useSandbox = Convert.ToBoolean(ConfigurationManager.AppSettings["IsSandbox"]);
+            var paypal = new PayPalModel(useSandbox);
+
+            paypal.item_name = product;
+            paypal.amount = totalPrice;
+            return View(paypal);
+        }
+
+        public ActionResult RedirectFromPaypal()
+        {
+            return View();
+        }
+
+        public ActionResult CancelFromPaypal()
+        {
+            return View();
+        }
+
+        public ActionResult NotifyFromPaypal()
+        {
+            return View();
         }
     }
 }
